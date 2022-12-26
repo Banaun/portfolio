@@ -1,23 +1,72 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from 'react';
+import useMeasure from 'react-use-measure';
+import FirstCard from './components/cards/FirstCard';
+import FourthCard from './components/cards/FourthCard';
+import SecondCard from './components/cards/SecondCard';
+import ThirdCard from './components/cards/ThirdCard';
+import DropArea from './components/DropArea';
+import useWindowSize from './hooks/useWindowSize';
 
 function App() {
+  const windowSize = useWindowSize();
+  const [ref, bounds] = useMeasure();
+  const [cardInDropArea, setCardInDropArea] = useState();
+  const [startAnimation, setStartAnimation] = useState(false);
+  // const [visibleCards, setVisibleCards] = useState();
+  // const cards = ['creativity', 'originality', 'fortitude', 'people'];
+
+  useEffect(() => {
+    if (!startAnimation) {
+      setInterval(() => {
+        setStartAnimation(true);
+      }, 1000);
+    }
+  }, [windowSize]);
+
+  // useEffect(() => {
+  //   setVisibleCards([...cards]);
+
+  //   if (cardInDropArea) {
+  //     let cardArr = cards.filter((c) => c !== cardInDropArea);
+  //     setVisibleCards([...cardArr]);
+  //   }
+  // }, [cardInDropArea]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className='flex h-screen'>
+      {startAnimation && (
+        <>
+          <DropArea ref={ref} />
+          <FirstCard
+            windowSize={windowSize}
+            dropArea={bounds}
+            setCardInDropArea={setCardInDropArea}
+          />
+          {/* <SecondCard windowSize={windowSize} />;
+          <ThirdCard windowSize={windowSize} />;
+          <FourthCard windowSize={windowSize} />; */}
+          {/* {visibleCards?.map((card) => {
+            if (card === 'creativity') {
+              return (
+                <FirstCard
+                  windowSize={windowSize}
+                  dropArea={bounds}
+                  setCardInDropArea={setCardInDropArea}
+                />
+              );
+            }
+            if (card === 'originality') {
+              return <SecondCard windowSize={windowSize} />;
+            }
+            if (card === 'fortitude') {
+              return <ThirdCard windowSize={windowSize} />;
+            }
+            if (card === 'people') {
+              return <FourthCard windowSize={windowSize} />;
+            }
+          })} */}
+        </>
+      )}
     </div>
   );
 }
