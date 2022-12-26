@@ -10,7 +10,7 @@ import useWindowSize from './hooks/useWindowSize';
 function App() {
   const windowSize = useWindowSize();
   const [ref, bounds] = useMeasure();
-  const [cardInDropArea, setCardInDropArea] = useState();
+  const [cardInDropArea, setCardInDropArea] = useState('');
   const [startAnimation, setStartAnimation] = useState(false);
   // const [visibleCards, setVisibleCards] = useState();
   // const cards = ['creativity', 'originality', 'fortitude', 'people'];
@@ -23,15 +23,6 @@ function App() {
     }
   }, [windowSize]);
 
-  // useEffect(() => {
-  //   setVisibleCards([...cards]);
-
-  //   if (cardInDropArea) {
-  //     let cardArr = cards.filter((c) => c !== cardInDropArea);
-  //     setVisibleCards([...cardArr]);
-  //   }
-  // }, [cardInDropArea]);
-
   return (
     <div className='flex h-screen'>
       {startAnimation && (
@@ -42,8 +33,12 @@ function App() {
             dropArea={bounds}
             setCardInDropArea={setCardInDropArea}
           />
-          {/* <SecondCard windowSize={windowSize} />;
-          <ThirdCard windowSize={windowSize} />;
+          <SecondCard
+            windowSize={windowSize}
+            dropArea={bounds}
+            setCardInDropArea={setCardInDropArea}
+          />
+          {/* <ThirdCard windowSize={windowSize} />;
           <FourthCard windowSize={windowSize} />; */}
           {/* {visibleCards?.map((card) => {
             if (card === 'creativity') {

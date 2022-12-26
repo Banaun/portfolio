@@ -1,19 +1,23 @@
 import { animated, useSpring } from '@react-spring/web';
-import { useDrag, useGesture } from '@use-gesture/react';
-import { useEffect, useState } from 'react';
+import { useGesture } from '@use-gesture/react';
+import { useState } from 'react';
 import useMeasure from 'react-use-measure';
 import Card01 from '../../static/cards/01.png';
-import Card01Back from '../../static/cards/01-back.png';
 
 function FirstCard({ windowSize, dropArea, setCardInDropArea }) {
   const [ref, bounds] = useMeasure();
   const [inDropArea, setInDropArea] = useState(false);
   const [flipped, setFlipped] = useState(false);
+  const [enlarge, setEnlarge] = useState(false);
 
   const [{ x, y }, api] = useSpring(() => ({
     x: 0,
     y: 0,
   }));
+
+  const scaleUp = useSpring({
+    transform: enlarge ? 'scale(4)' : 'scale(1)',
+  });
 
   const { transform, opacity } = useSpring({
     opacity: flipped ? 1 : 0,
@@ -31,11 +35,13 @@ function FirstCard({ windowSize, dropArea, setCardInDropArea }) {
   const bind = useGesture(
     {
       onDrag: ({ down, movement: [mx, my], offset: [ox, oy] }) => {
-        api.start({
-          x: ox,
-          y: oy,
-          immediate: down,
-        });
+        if (!inDropArea) {
+          api.start({
+            x: ox,
+            y: oy,
+            immediate: down,
+          });
+        }
       },
       onDragEnd: ({ offset: [ox, oy] }) => {
         if (
@@ -57,6 +63,10 @@ function FirstCard({ windowSize, dropArea, setCardInDropArea }) {
               setInterval(() => {
                 setFlipped(true);
               }, 500);
+
+              setInterval(() => {
+                setEnlarge(true);
+              }, 1300);
             }
           }
         }
@@ -74,34 +84,11 @@ function FirstCard({ windowSize, dropArea, setCardInDropArea }) {
     }
   );
 
-  // const bind = useDrag(
-  //   ({ down, movement: [mx, my], offset: [ox, oy] }) =>
-  //     // api.start({
-  //     //   x: down ? mx : 0,
-  //     //   y: down ? my : 0,
-  //     //   immediate: down,
-  //     // })
-  //     if (mx)
-  //     api.start({
-  //       x: ox,
-  //       y: oy,
-  //       immediate: down,
-  //     }),
-  //   {
-  //     bounds: {
-  //       left: -20,
-  //       right: windowSize.width - bounds.width - 20,
-  //       top: -20,
-  //       bottom: windowSize.height - bounds.height - 20,
-  //     },
-  //   }
-  // );
-
   return (
     <animated.div
       ref={ref}
       className={`absolute grid top-5 left-5 rounded-[0.57rem] touch-none ${
-        inDropArea && 'justify-center items-center'
+        inDropArea && 'justify-center items-center z-50'
       }`}
       {...bind()}
       style={{ ...animateIn, x, y }}
@@ -109,24 +96,33 @@ function FirstCard({ windowSize, dropArea, setCardInDropArea }) {
       {inDropArea ? (
         <>
           <animated.div
-            className={'col-start-1 row-start-1 rounded-[0.57rem] touch-none'}
+            className={
+              'col-start-1 row-start-1 rounded-[0.57rem] touch-none h-'
+            }
             style={{ opacity: opacity.to((o) => 1 - o), transform }}
           >
             <img
               src={Card01}
               className='h-32 md:h-52 lg:h-72 rounded-[0.57rem] shadow-md hover:shadow-lg cursor-grab'
               draggable='false'
+              alt='creativity'
             />
           </animated.div>
           <animated.div
             className={'col-start-1 row-start-1 rounded-[0.57rem] touch-none'}
-            style={{ opacity, transform, rotateY: '180deg' }}
+            style={{
+              opacity,
+              transform,
+              rotateY: '180deg',
+            }}
           >
-            <img
-              src={Card01Back}
-              className='h-32 md:h-52 lg:h-72 rounded-[0.57rem] shadow-md hover:shadow-lg cursor-grab'
+            <animated.div
+              className='flex bg-[url("./static/cards/01-back.png")] bg-contain h-32 md:h-52 lg:h-72 justify-center items-center rounded-[0.57rem] shadow-md hover:shadow-lg cursor-grab'
               draggable='false'
-            />
+              style={{ ...scaleUp }}
+            >
+              <span>hej</span>
+            </animated.div>
           </animated.div>
         </>
       ) : (
@@ -134,6 +130,7 @@ function FirstCard({ windowSize, dropArea, setCardInDropArea }) {
           src={Card01}
           className='col-start-1 row-start-1 h-32 md:h-52 lg:h-72 rounded-[0.57rem] shadow-md hover:shadow-lg cursor-grab'
           draggable='false'
+          alt='creativity'
         />
       )}
     </animated.div>
