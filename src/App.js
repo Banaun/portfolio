@@ -31,15 +31,27 @@ function App() {
           <FirstCard
             windowSize={windowSize}
             dropArea={bounds}
+            cardInDropArea={cardInDropArea}
             setCardInDropArea={setCardInDropArea}
           />
           <SecondCard
             windowSize={windowSize}
             dropArea={bounds}
+            cardInDropArea={cardInDropArea}
             setCardInDropArea={setCardInDropArea}
           />
-          {/* <ThirdCard windowSize={windowSize} />;
-          <FourthCard windowSize={windowSize} />; */}
+          <ThirdCard
+            windowSize={windowSize}
+            dropArea={bounds}
+            cardInDropArea={cardInDropArea}
+            setCardInDropArea={setCardInDropArea}
+          />
+          <FourthCard
+            windowSize={windowSize}
+            dropArea={bounds}
+            cardInDropArea={cardInDropArea}
+            setCardInDropArea={setCardInDropArea}
+          />
           {/* {visibleCards?.map((card) => {
             if (card === 'creativity') {
               return (

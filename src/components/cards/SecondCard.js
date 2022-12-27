@@ -1,21 +1,35 @@
 import { animated, useSpring } from '@react-spring/web';
 import { useGesture } from '@use-gesture/react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import useMeasure from 'react-use-measure';
 import Card02 from '../../static/cards/02.png';
 
-function SecondCard({ windowSize, dropArea, setCardInDropArea }) {
+function SecondCard({
+  windowSize,
+  dropArea,
+  cardInDropArea,
+  setCardInDropArea,
+}) {
   const [ref, bounds] = useMeasure();
+  const scaledImageRef = useRef();
   const [inDropArea, setInDropArea] = useState(false);
   const [flipped, setFlipped] = useState(false);
   const [enlarge, setEnlarge] = useState(false);
+
+  useEffect(() => {
+    if (inDropArea) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () =>
+        document.removeEventListener('mousedown', handleClickOutside);
+    }
+  });
 
   const [{ x, y }, api] = useSpring(() => ({
     x: 0,
     y: 0,
   }));
 
-  const scaleUp = useSpring({
+  const scale = useSpring({
     transform: enlarge ? 'scale(4)' : 'scale(1)',
   });
 
@@ -35,59 +49,103 @@ function SecondCard({ windowSize, dropArea, setCardInDropArea }) {
   const bind = useGesture(
     {
       onDrag: ({ down, movement: [mx, my], offset: [ox, oy] }) => {
-        if (!inDropArea) {
+        if (!cardInDropArea) {
           api.start({
-            x: ox,
-            y: oy,
+            x: down ? mx : 0,
+            y: down ? my : 0,
             immediate: down,
           });
         }
       },
-      onDragEnd: ({ offset: [ox, oy] }) => {
-        if (
-          ox + windowSize.width - 20 >= dropArea.left &&
-          ox + windowSize.width - bounds.width - 20 <=
-            dropArea.left + dropArea.width
-        ) {
+      onDragEnd: ({ movement: [mx, my], offset: [ox, oy] }) => {
+        if (!inDropArea) {
           if (
-            oy + 20 >= dropArea.top &&
-            oy + bounds.height + 20 <= dropArea.top + dropArea.height
+            mx + windowSize.width - 20 >= dropArea.left &&
+            mx + windowSize.width - bounds.width - 20 <=
+              dropArea.left + dropArea.width
           ) {
-            api.start({
-              x:
-                dropArea.left -
-                windowSize.width +
-                20 +
-                (dropArea.width + bounds.width) / 2,
-              y: dropArea.top - 20 + (dropArea.height - bounds.height) / 2,
-            });
-            setCardInDropArea('originality');
-            setInDropArea(true);
+            if (
+              my + 20 >= dropArea.top &&
+              my + bounds.height + 20 <= dropArea.top + dropArea.height
+            ) {
+              api.start({
+                x:
+                  dropArea.left -
+                  windowSize.width +
+                  20 +
+                  (dropArea.width + bounds.width) / 2,
+                y: dropArea.top - 20 + (dropArea.height - bounds.height) / 2,
+              });
+              setCardInDropArea('originality');
+              setInDropArea(true);
 
-            if (!flipped) {
-              setInterval(() => {
-                setFlipped(true);
-              }, 500);
+              if (!flipped) {
+                setTimeout(() => {
+                  setFlipped(true);
+                }, 500);
 
-              setInterval(() => {
-                setEnlarge(true);
-              }, 1300);
+                setTimeout(() => {
+                  setEnlarge(true);
+                  console.log('enlarging');
+                }, 1300);
+              }
             }
           }
         }
       },
-    },
-    {
-      drag: {
-        bounds: {
-          // left: windowSize.width + bounds.width + 20,
-          right: 20,
-          top: -20,
-          // bottom: bounds.height + 20,
-        },
-      },
     }
+    // {
+    //   drag: {
+    //     bounds: {
+    //       left: -windowSize.width + bounds.width + 20,
+    //       right: 20,
+    //       top: -20,
+    //       bottom: windowSize.height - bounds.height - 20,
+    //     },
+    //   },
+    // }
   );
+
+  const handleClickOutside = (e) => {
+    e.preventDefault();
+
+    if (!scaledImageRef.current.contains(e.target)) {
+      setEnlarge(false);
+
+      setTimeout(() => {
+        setFlipped(false);
+      }, 500);
+
+      setTimeout(() => {
+        api.start({
+          x: 0,
+          y: 0,
+        });
+        setInDropArea(false);
+        setCardInDropArea('');
+      }, 1300);
+    }
+  };
+
+  // const handleClick = (e) => {
+  //   e.preventDefault();
+
+  //   if (inDropArea) {
+  //     setEnlarge(false);
+
+  //     setTimeout(() => {
+  //       setFlipped(false);
+  //     }, 500);
+
+  //     setTimeout(() => {
+  //       api.start({
+  //         x: 0,
+  //         y: 0,
+  //       });
+  //       setInDropArea(false);
+  //     }, 1300);
+  //   }
+  // };
 
   return (
     <animated.div
@@ -95,6 +153,7 @@ function SecondCard({ windowSize, dropArea, setCardInDropArea }) {
       className={`absolute grid top-5 right-5 rounded-[0.57rem] touch-none ${
         inDropArea && 'justify-center items-center z-50'
       }`}
+      // onClick={handleClick}
       {...bind()}
       style={{ ...animateIn, x, y }}
     >
@@ -122,9 +181,10 @@ function SecondCard({ windowSize, dropArea, setCardInDropArea }) {
             }}
           >
             <animated.div
-              className='flex bg-[url("./static/cards/01-back.png")] bg-contain h-32 md:h-52 lg:h-72 justify-center items-center rounded-[0.57rem] shadow-md hover:shadow-lg cursor-grab'
+              ref={scaledImageRef}
+              className='flex bg-[url("./static/cards/01-back.png")] bg-contain h-32 md:h-52 lg:h-72 justify-center items-center rounded-[0.57rem] shadow-md hover:shadow-lg touch-none cursor-grab'
               draggable='false'
-              style={{ ...scaleUp }}
+              style={{ ...scale }}
             >
               <span>hej</span>
             </animated.div>
