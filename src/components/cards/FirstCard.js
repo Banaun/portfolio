@@ -19,10 +19,20 @@ function FirstCard({
   useEffect(() => {
     if (inDropArea) {
       document.addEventListener('mousedown', handleClickOutside);
-      return () =>
+      document.addEventListener('touchstart', handleClickOutside);
+      return () => {
         document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('touchstart', handleClickOutside);
+      };
     }
   });
+
+  useEffect(() => {
+    console.log(windowSize);
+    if (inDropArea) {
+      resetCardPosition();
+    }
+  }, [windowSize]);
 
   const [{ x, y }, api] = useSpring(() => ({
     x: 0,
@@ -30,7 +40,12 @@ function FirstCard({
   }));
 
   const scale = useSpring({
-    transform: enlarge ? 'scale(4)' : 'scale(1)',
+    transform:
+      enlarge && windowSize.width > 550
+        ? 'scale(4)'
+        : enlarge && windowSize.height < 550
+        ? 'scale(3)'
+        : 'scale(1)',
   });
 
   const { transform, opacity } = useSpring({
@@ -81,7 +96,6 @@ function FirstCard({
 
                 setTimeout(() => {
                   setEnlarge(true);
-                  console.log('enlarging');
                 }, 1300);
               }
             }
@@ -101,60 +115,62 @@ function FirstCard({
     // }
   );
 
+  const resetCardPosition = () => {
+    setEnlarge(false);
+
+    setTimeout(() => {
+      setFlipped(false);
+    }, 500);
+
+    setTimeout(() => {
+      api.start({
+        x: 0,
+        y: 0,
+      });
+      setInDropArea(false);
+      setCardInDropArea('');
+    }, 1300);
+  };
+
   const handleClickOutside = (e) => {
-    e.preventDefault();
-
     if (!scaledImageRef.current.contains(e.target)) {
-      setEnlarge(false);
-
-      setTimeout(() => {
-        setFlipped(false);
-      }, 500);
-
-      setTimeout(() => {
-        api.start({
-          x: 0,
-          y: 0,
-        });
-        setInDropArea(false);
-        setCardInDropArea('');
-      }, 1300);
+      resetCardPosition();
     }
   };
 
-  const handleClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  // const handleClick = (e) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
 
-    // setClickedOutside(false);
+  //   setClickedOutside(false);
 
-    // console.log(e.target);
-    // console.log(ref);
+  //   console.log(e.target);
+  //   console.log(ref);
 
-    // if (inDropArea) {
-    //   setEnlarge(false);
+  //   if (inDropArea) {
+  //     setEnlarge(false);
 
-    //   setTimeout(() => {
-    //     setFlipped(false);
-    //   }, 500);
+  //     setTimeout(() => {
+  //       setFlipped(false);
+  //     }, 500);
 
-    //   setTimeout(() => {
-    //     api.start({
-    //       x: 0,
-    //       y: 0,
-    //     });
-    //     setInDropArea(false);
-    //   }, 1300);
-    // }
-  };
+  //     setTimeout(() => {
+  //       api.start({
+  //         x: 0,
+  //         y: 0,
+  //       });
+  //       setInDropArea(false);
+  //     }, 1300);
+  //   }
+  // };
 
   return (
     <animated.div
       ref={ref}
-      className={`absolute grid top-5 left-5 rounded-[0.57rem] touch-none ${
+      className={`absolute grid top-5 left-5 rounded-[0.57rem] shadow-md hover:shadow-2xl touch-none ${
         inDropArea && 'justify-center items-center z-50'
       }`}
-      onClick={handleClick}
+      // onClick={handleClick}
       {...bind()}
       style={{ ...animateIn, x, y }}
     >
@@ -166,7 +182,7 @@ function FirstCard({
           >
             <img
               src={Card01}
-              className='h-32 md:h-52 lg:h-72 rounded-[0.57rem] shadow-md hover:shadow-lg cursor-grab'
+              className='h-32 md:h-52 lg:h-72 rounded-[0.57rem] cursor-grab'
               draggable='false'
               alt='creativity'
             />
@@ -181,7 +197,7 @@ function FirstCard({
           >
             <animated.div
               ref={scaledImageRef}
-              className='flex bg-[url("./static/cards/01-back.png")] bg-contain h-32 md:h-52 lg:h-72 justify-center items-center rounded-[0.57rem] shadow-md hover:shadow-lg touch-none cursor-grab'
+              className='flex bg-[url("./static/cards/01-back.png")] bg-contain h-32 md:h-52 lg:h-72 justify-center items-center rounded-[0.57rem] touch-none cursor-grab'
               draggable='false'
               style={{ ...scale }}
             >

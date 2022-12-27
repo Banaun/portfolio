@@ -19,10 +19,19 @@ function SecondCard({
   useEffect(() => {
     if (inDropArea) {
       document.addEventListener('mousedown', handleClickOutside);
-      return () =>
+      document.addEventListener('touchstart', handleClickOutside);
+      return () => {
         document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('touchstart', handleClickOutside);
+      };
     }
   });
+
+  useEffect(() => {
+    if (inDropArea) {
+      resetCardPosition();
+    }
+  }, [windowSize]);
 
   const [{ x, y }, api] = useSpring(() => ({
     x: 0,
@@ -30,7 +39,12 @@ function SecondCard({
   }));
 
   const scale = useSpring({
-    transform: enlarge ? 'scale(4)' : 'scale(1)',
+    transform:
+      enlarge && windowSize.width > 550
+        ? 'scale(4)'
+        : enlarge && windowSize.height < 550
+        ? 'scale(3)'
+        : 'scale(1)',
   });
 
   const { transform, opacity } = useSpring({
@@ -86,7 +100,6 @@ function SecondCard({
 
                 setTimeout(() => {
                   setEnlarge(true);
-                  console.log('enlarging');
                 }, 1300);
               }
             }
@@ -106,24 +119,26 @@ function SecondCard({
     // }
   );
 
+  const resetCardPosition = () => {
+    setEnlarge(false);
+
+    setTimeout(() => {
+      setFlipped(false);
+    }, 500);
+
+    setTimeout(() => {
+      api.start({
+        x: 0,
+        y: 0,
+      });
+      setInDropArea(false);
+      setCardInDropArea('');
+    }, 1300);
+  };
+
   const handleClickOutside = (e) => {
-    e.preventDefault();
-
     if (!scaledImageRef.current.contains(e.target)) {
-      setEnlarge(false);
-
-      setTimeout(() => {
-        setFlipped(false);
-      }, 500);
-
-      setTimeout(() => {
-        api.start({
-          x: 0,
-          y: 0,
-        });
-        setInDropArea(false);
-        setCardInDropArea('');
-      }, 1300);
+      resetCardPosition();
     }
   };
 

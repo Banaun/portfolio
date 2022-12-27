@@ -2,10 +2,15 @@
 module.exports = {
   content: ['./src/**/*.{html,js}'],
   theme: {
-    fontSize: {
-      xxs: ['0.5rem', '0.75rem'],
+    extend: {
+      screens: {
+        'sm-height': { raw: '(min-height: 550px)' },
+
+        'md-height': { raw: '(min-height: 900px)' },
+
+        'lg-height': { raw: '(min-height: 1200px)' },
+      },
     },
-    extend: {},
   },
   plugins: [],
 };
