@@ -15,6 +15,7 @@ function FourthCard({
   const [inDropArea, setInDropArea] = useState(false);
   const [flipped, setFlipped] = useState(false);
   const [enlarge, setEnlarge] = useState(false);
+  const [scaleAmount, setScaleAmount] = useState('scale(4)');
 
   useEffect(() => {
     if (inDropArea) {
@@ -31,7 +32,40 @@ function FourthCard({
     if (inDropArea) {
       resetCardPosition();
     }
-  }, [windowSize]);
+
+    switch (bounds.height) {
+      case 288:
+        if (windowSize.height < 1150 && windowSize.height >= 870) {
+          setScaleAmount('scale(3)');
+        } else if (windowSize.height < 870) {
+          setScaleAmount('scale(2.5)');
+        } else {
+          setScaleAmount('scale(4)');
+        }
+        break;
+      case 208:
+        if (windowSize.height < 840 && windowSize.height >= 630) {
+          setScaleAmount('scale(3)');
+        } else if (windowSize.height < 630) {
+          setScaleAmount('scale(2.5)');
+        } else {
+          setScaleAmount('scale(4)');
+        }
+        break;
+      case 128:
+        if (windowSize.height < 520 && windowSize.height >= 390) {
+          setScaleAmount('scale(3)');
+        } else if (windowSize.height < 390) {
+          setScaleAmount('scale(2.5)');
+        } else {
+          setScaleAmount('scale(4)');
+        }
+        break;
+      default:
+        setScaleAmount('scale(4)');
+        break;
+    }
+  }, [windowSize, bounds.height]);
 
   const [{ x, y }, api] = useSpring(() => ({
     x: 0,
@@ -39,18 +73,13 @@ function FourthCard({
   }));
 
   const scale = useSpring({
-    transform:
-      enlarge && windowSize.width > 550
-        ? 'scale(4)'
-        : enlarge && windowSize.height < 550
-        ? 'scale(3)'
-        : 'scale(1)',
+    transform: enlarge ? scaleAmount : 'scale(1)',
   });
 
   const { transform, opacity } = useSpring({
     opacity: flipped ? 1 : 0,
     transform: `perspective(500px) rotateY(${flipped ? 180 : 0}deg)`,
-    config: { mass: 5, tension: 500, friction: 80 },
+    config: { mass: 5, tension: 500, friction: 60 },
   });
 
   const animateIn = useSpring({
@@ -62,7 +91,7 @@ function FourthCard({
 
   const bind = useGesture(
     {
-      onDrag: ({ down, movement: [mx, my], offset: [ox, oy] }) => {
+      onDrag: ({ down, movement: [mx, my] }) => {
         if (!cardInDropArea) {
           api.start({
             x: down ? mx : 0,
@@ -71,7 +100,7 @@ function FourthCard({
           });
         }
       },
-      onDragEnd: ({ movement: [mx, my], offset: [ox, oy] }) => {
+      onDragEnd: ({ movement: [mx, my] }) => {
         if (!inDropArea) {
           if (
             mx + 20 >= dropArea.left &&
@@ -82,27 +111,7 @@ function FourthCard({
               my + windowSize.height - bounds.height - 20 + bounds.height <=
                 dropArea.top + dropArea.height
             ) {
-              api.start({
-                x: dropArea.left - 20 + (dropArea.width - bounds.width) / 2,
-                y:
-                  dropArea.top -
-                  windowSize.height +
-                  bounds.height +
-                  20 +
-                  (dropArea.height - bounds.height) / 2,
-              });
-              setCardInDropArea('people');
-              setInDropArea(true);
-
-              if (!flipped) {
-                setTimeout(() => {
-                  setFlipped(true);
-                }, 500);
-
-                setTimeout(() => {
-                  setEnlarge(true);
-                }, 1300);
-              }
+              centerCardInDropArea();
             }
           }
         }
@@ -119,6 +128,33 @@ function FourthCard({
     //   },
     // }
   );
+
+  const centerCardInDropArea = () => {
+    api.start({
+      x: dropArea.left - 20 + (dropArea.width - bounds.width) / 2,
+      y:
+        dropArea.top -
+        windowSize.height +
+        bounds.height +
+        20 +
+        (dropArea.height - bounds.height) / 2,
+    });
+    setInDropArea(true);
+
+    setTimeout(() => {
+      setCardInDropArea('creativity');
+    }, 500);
+
+    if (!flipped) {
+      setTimeout(() => {
+        setFlipped(true);
+      }, 900);
+
+      setTimeout(() => {
+        setEnlarge(true);
+      }, 1500);
+    }
+  };
 
   const resetCardPosition = () => {
     setEnlarge(false);
@@ -143,30 +179,13 @@ function FourthCard({
     }
   };
 
-  // const handleClick = (e) => {
-  //   e.preventDefault();
+  const handleDoubleClick = (e) => {
+    e.preventDefault();
 
-  //   setClickedOutside(false);
-
-  //   console.log(e.target);
-  //   console.log(ref);
-
-  //   if (inDropArea) {
-  //     setEnlarge(false);
-
-  //     setTimeout(() => {
-  //       setFlipped(false);
-  //     }, 500);
-
-  //     setTimeout(() => {
-  //       api.start({
-  //         x: 0,
-  //         y: 0,
-  //       });
-  //       setInDropArea(false);
-  //     }, 1300);
-  //   }
-  // };
+    if (!inDropArea) {
+      centerCardInDropArea();
+    }
+  };
 
   return (
     <animated.div
@@ -174,7 +193,7 @@ function FourthCard({
       className={`absolute grid bottom-5 left-5 rounded-[0.57rem] touch-none ${
         inDropArea && 'justify-center items-center z-50'
       }`}
-      // onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
       {...bind()}
       style={{ ...animateIn, x, y }}
     >
@@ -203,7 +222,7 @@ function FourthCard({
           >
             <animated.div
               ref={scaledImageRef}
-              className='flex bg-[url("./static/cards/01-back.png")] bg-contain h-32 md:h-52 lg:h-72 justify-center items-center rounded-[0.57rem] shadow-md hover:shadow-lg touch-none cursor-grab'
+              className='flex bg-[url("./static/cards/01-back.png")] bg-contain h-32 md:h-52 lg:h-72 justify-center items-center rounded-[0.57rem] touch-none cursor-grab'
               draggable='false'
               style={{ ...scale }}
             >

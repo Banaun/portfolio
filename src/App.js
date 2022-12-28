@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import useMeasure from 'react-use-measure';
-import FirstCard from './components/cards/FirstCard';
+import CharacterCard from './components/cards/CharacterCard';
 import FourthCard from './components/cards/FourthCard';
 import SecondCard from './components/cards/SecondCard';
 import ThirdCard from './components/cards/ThirdCard';
@@ -27,8 +27,8 @@ function App() {
     <div className='flex h-screen'>
       {startAnimation && (
         <>
-          <DropArea ref={ref} />
-          <FirstCard
+          <DropArea cardInDropArea={cardInDropArea} ref={ref} />
+          <CharacterCard
             windowSize={windowSize}
             dropArea={bounds}
             cardInDropArea={cardInDropArea}
