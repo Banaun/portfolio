@@ -12,8 +12,6 @@ function App() {
   const [ref, bounds] = useMeasure();
   const [cardInDropArea, setCardInDropArea] = useState('');
   const [startAnimation, setStartAnimation] = useState(false);
-  // const [visibleCards, setVisibleCards] = useState();
-  // const cards = ['creativity', 'originality', 'fortitude', 'people'];
 
   useEffect(() => {
     if (!startAnimation) {
@@ -52,26 +50,6 @@ function App() {
             cardInDropArea={cardInDropArea}
             setCardInDropArea={setCardInDropArea}
           />
-          {/* {visibleCards?.map((card) => {
-            if (card === 'creativity') {
-              return (
-                <FirstCard
-                  windowSize={windowSize}
-                  dropArea={bounds}
-                  setCardInDropArea={setCardInDropArea}
-                />
-              );
-            }
-            if (card === 'originality') {
-              return <SecondCard windowSize={windowSize} />;
-            }
-            if (card === 'fortitude') {
-              return <ThirdCard windowSize={windowSize} />;
-            }
-            if (card === 'people') {
-              return <FourthCard windowSize={windowSize} />;
-            }
-          })} */}
         </>
       )}
     </div>
