@@ -1,8 +1,8 @@
 # Portfolio - Emil Mogensen
 
-## Available Scripts
+## Instructions
 
-In the project directory, you can run:
+In the project directory, run `npm install` to install project dependencies, then run `npm start` to run the application on localhost.
 
 ### `npm start`
 
